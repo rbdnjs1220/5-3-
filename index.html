@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성악적 표현 비교·분석</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#f5e8e8;min-height:100vh;padding:20px 16px}
+.wrap{max-width:640px;margin:0 auto;background:#fdf8f8;border-radius:16px;border:2px solid #c0392b;overflow:hidden}
+.header{background:#c0392b;padding:14px 20px;text-align:center}
+.header-title{font-size:17px;font-weight:700;color:#fff}
+.header-sub{font-size:12px;color:#f5c6c6;margin-top:2px}
+.body{padding:20px}
+.screen{display:none}.screen.active{display:block}
+.song-section{margin-bottom:24px}
+.song-title{font-size:15px;font-weight:700;color:#8b0000;margin-bottom:4px;padding-left:8px;border-left:3px solid #c0392b}
+.song-sub{font-size:12px;color:#a05030;margin-bottom:12px;padding-left:11px}
+.step-label{font-size:12px;font-weight:700;color:#8b6040;margin-bottom:8px}
+.style-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.style-btn{padding:10px 12px;border-radius:12px;border:1.5px solid #e8c4c4;background:#fffafa;cursor:pointer;transition:all .15s;text-align:left}
+.style-btn:hover{border-color:#c0392b;background:#f9e4e4}
+.style-btn.selected{border-color:#c0392b;background:#c0392b;color:#fff}
+.style-btn.correct{border-color:#27ae60;background:#f0fff4;cursor:default}
+.style-btn.wrong{border-color:#bbb;background:#f5f5f5;cursor:default;opacity:.6}
+.style-name{font-size:14px;font-weight:700;margin-bottom:2px;color:#8b0000}
+.style-btn.selected .style-name{color:#fff}
+.style-btn.correct .style-name{color:#1a6b3a}
+.style-btn.wrong .style-name{color:#999}
+.style-desc{font-size:11px;color:#888;line-height:1.4}
+.style-btn.selected .style-desc{color:#f5c6c6}
+.style-btn.correct .style-desc{color:#27ae60}
+.kw-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.kw-btn{padding:8px 14px;border-radius:20px;border:1.5px solid #e8c4c4;background:#fffafa;color:#3b1a00;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s;user-select:none}
+.kw-btn:hover{border-color:#c0392b;background:#f9e4e4}
+.kw-btn.selected{border-color:#c0392b;background:#c0392b;color:#fff}
+.kw-btn.correct{border-color:#27ae60;background:#f0fff4;color:#1a6b3a;cursor:default}
+.kw-btn.wrong{border-color:#bbb;background:#f5f5f5;color:#aaa;text-decoration:line-through;cursor:default}
+.kw-btn.missed{border-color:#e8b84b;background:#fffbe6;color:#8b6000;cursor:default}
+.reason-label{font-size:12px;font-weight:600;color:#8b6040;margin-bottom:4px}
+.reason-input{width:100%;padding:9px 12px;border:1.5px solid #e8c4c4;border-radius:10px;font-size:13px;background:#fffafa;color:#3b1a00;font-family:inherit;outline:none;resize:vertical;min-height:56px}
+.reason-input:focus{border-color:#c0392b}
+.check-btn{width:100%;padding:11px;border-radius:10px;border:none;background:#c0392b;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px}
+.check-btn:hover{opacity:.85}
+.check-btn:disabled{opacity:.4;cursor:not-allowed}
+.result-msg{font-size:13px;font-weight:600;text-align:center;padding:10px;border-radius:8px;margin-top:10px;display:none}
+.feedback{font-size:12px;margin-top:8px;padding:8px 12px;border-radius:8px;display:none;line-height:1.6}
+.feedback.show{display:block}
+.feedback.good{background:#f0fff4;border:1px solid #27ae60;color:#1a6b3a}
+.feedback.bad{background:#f9e4e4;border:1px solid #c0392b;color:#8b0000}
+.divider{height:1px;background:#e8c4c4;margin:20px 0}
+.next-btn{width:100%;padding:12px;border-radius:10px;border:none;background:#8b0000;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:12px}
+.next-btn:hover{opacity:.85}
+.next-btn:disabled{opacity:.4;cursor:not-allowed}
+.compare-title{font-size:15px;font-weight:700;color:#8b0000;margin-bottom:4px;padding-left:8px;border-left:3px solid #c0392b}
+.compare-sub{font-size:12px;color:#a05030;margin-bottom:16px;padding-left:11px}
+.kw-summary{background:#fffafa;border:1.5px solid #e8c4c4;border-radius:10px;padding:12px;margin-bottom:12px}
+.kw-summary-title{font-size:12px;font-weight:700;color:#8b0000;margin-bottom:8px}
+.kw-tags{display:flex;flex-wrap:wrap;gap:6px}
+.kw-tag{padding:4px 10px;border-radius:14px;font-size:12px;font-weight:500;background:#f0fff4;border:1px solid #27ae60;color:#1a6b3a}
+.kw-tag.style{background:#f9e4e4;border-color:#c0392b;color:#8b0000}
+.hint-box{background:#fffbe6;border:1px solid #e8b84b;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#8b6000;line-height:1.6}
+.compare-input{width:100%;padding:9px 12px;border:1.5px solid #e8c4c4;border-radius:10px;font-size:13px;background:#fffafa;color:#3b1a00;font-family:inherit;outline:none;resize:vertical;min-height:70px}
+.compare-input:focus{border-color:#c0392b}
+.submit-btn{width:100%;padding:13px;border-radius:10px;border:none;background:#8b0000;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:16px}
+.submit-btn:hover{opacity:.85}
+.havruta-section{margin-top:20px}
+.havruta-title{font-size:15px;font-weight:700;color:#8b0000;margin-bottom:4px;padding-left:8px;border-left:3px solid #c0392b}
+.havruta-sub{font-size:12px;color:#a05030;margin-bottom:16px;padding-left:11px}
+.havruta-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.havruta-card{background:#fffafa;border:1.5px solid #e8c4c4;border-radius:12px;padding:12px}
+.havruta-card.mine{border-color:#c0392b;background:#fff5f5}
+.havruta-card.pair{border-color:#e8c4c4;background:#fffafa}
+.havruta-card-title{font-size:12px;font-weight:700;margin-bottom:6px}
+.havruta-card.mine .havruta-card-title{color:#8b0000}
+.havruta-card.pair .havruta-card-title{color:#8b6040}
+.havruta-input{width:100%;padding:8px 10px;border:1.5px solid #e8c4c4;border-radius:8px;font-size:13px;background:#fff;color:#3b1a00;font-family:inherit;outline:none;resize:vertical;min-height:60px}
+.havruta-input:focus{border-color:#c0392b}
+.done-icon{font-size:48px;text-align:center;margin-bottom:12px}
+.done-title{font-size:18px;font-weight:700;color:#8b0000;text-align:center;margin-bottom:6px}
+.done-sub{font-size:13px;color:#a05030;text-align:center;margin-bottom:20px}
+.done-card{background:#fffafa;border:1.5px solid #e8c4c4;border-radius:12px;padding:14px;margin-bottom:12px}
+.done-card-title{font-size:13px;font-weight:700;color:#8b0000;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #e8c4c4}
+.done-row{font-size:13px;color:#3b1a00;line-height:1.6;margin-bottom:6px}
+.done-key{font-size:11px;color:#8b6040;font-weight:600;margin-bottom:2px;margin-top:8px}
+.reset-btn{width:100%;padding:11px;border-radius:10px;border:1.5px solid #c0392b;background:#fdf8f8;color:#8b0000;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-title">성악적 표현 비교·분석</div>
+    <div class="header-sub">감상하고 키워드를 선택한 뒤 짝과 함께 비교해보세요</div>
+  </div>
+  <div class="body">
+
+    <div class="screen active" id="s-kw">
+      <div class="song-section">
+        <div class="song-title">🎵 쑥대머리 〈춘향가 中〉</div>
+        <div class="song-sub">판소리</div>
+        <div class="step-label">① 음악 양식을 선택해보세요</div>
+        <div class="style-grid">
+          <div class="style-btn" id="s1-계면조" onclick="selStyle(1,'계면조')">
+            <div class="style-name">계면조</div>
+            <div class="style-desc">슬프고 애절한 느낌</div>
+          </div>
+          <div class="style-btn" id="s1-우조" onclick="selStyle(1,'우조')">
+            <div class="style-name">우조</div>
+            <div class="style-desc">씩씩하고 강한 느낌</div>
+          </div>
+        </div>
+        <div class="step-label">② 성악적 표현을 모두 골라보세요</div>
+        <div class="kw-grid" id="kw1">
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,1)">굵고 걸걸한 발성</div>
+          <div class="kw-btn" data-correct="false" onclick="toggleKw(this,1)">가늘고 높은 가성</div>
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,1)">음을 길게 늘이며 높게 떠는 소리로 한(恨)을 표현</div>
+          <div class="kw-btn" data-correct="false" onclick="toggleKw(this,1)">빠르고 경쾌한 리듬</div>
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,1)">느리고 무거운 장단</div>
+        </div>
+        <div class="reason-label">어떤 부분에서 그렇게 느꼈나요?</div>
+        <textarea class="reason-input" id="reason1" placeholder="감상하면서 느낀 점을 자유롭게 적어보세요"></textarea>
+        <button class="check-btn" id="check1" onclick="checkAnswer(1)">정답 확인</button>
+        <div class="result-msg" id="result1"></div>
+        <div class="feedback" id="feedback1">쑥대머리는 <b>계면조</b>로 슬프고 애절한 분위기예요. 판소리 특유의 <b>통성(通聲)</b>으로 굵고 걸걸한 발성을 쓰고, 느린 <b>진양조 장단</b>에 얹어 음을 길게 늘이며 높게 떨리는 소리로 한(恨)을 표현해요.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="song-section">
+        <div class="song-title">🎭 해하가 〈패왕별희 中〉</div>
+        <div class="song-sub">경극</div>
+        <div class="step-label">① 음악 양식을 선택해보세요</div>
+        <div class="style-grid">
+          <div class="style-btn" id="s2-서피" onclick="selStyle(2,'서피')">
+            <div class="style-name">서피 (西皮)</div>
+            <div class="style-desc">밝고 경쾌한 느낌</div>
+          </div>
+          <div class="style-btn" id="s2-이황" onclick="selStyle(2,'이황')">
+            <div class="style-name">이황 (二黃)</div>
+            <div class="style-desc">어둡고 무거운 느낌</div>
+          </div>
+        </div>
+        <div class="step-label">② 성악적 표현을 모두 골라보세요</div>
+        <div class="kw-grid" id="kw2">
+          <div class="kw-btn" data-correct="false" onclick="toggleKw(this,2)">가늘고 높은 가성</div>
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,2)">굵고 중후한 발성</div>
+          <div class="kw-btn" data-correct="false" onclick="toggleKw(this,2)">여러 명이 함께 노래</div>
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,2)">음을 길게 늘이며 꾸밈</div>
+          <div class="kw-btn" data-correct="true" onclick="toggleKw(this,2)">상대적으로 비음(鼻音)을 사용</div>
+        </div>
+        <div class="reason-label">어떤 부분에서 그렇게 느꼈나요?</div>
+        <textarea class="reason-input" id="reason2" placeholder="감상하면서 느낀 점을 자유롭게 적어보세요"></textarea>
+        <button class="check-btn" id="check2" onclick="checkAnswer(2)">정답 확인</button>
+        <div class="result-msg" id="result2"></div>
+        <div class="feedback" id="feedback2">해하가는 <b>이황(二黃)</b> 계열로 어둡고 무거운 분위기예요. 항우 역할은 <b>노생(老生)</b> 계열로 굵고 중후한 발성을 쓰고, 음을 길게 늘이며 꾸밈음을 넣어요. 경극 특유의 <b>비음(鼻音)</b>이 섞여 독특한 음색을 만들어요.</div>
+      </div>
+
+      <button class="next-btn" id="next-btn" onclick="toCompare()" disabled>짝과 함께 비교하기 →</button>
+    </div>
+
+    <div class="screen" id="s-compare">
+      <div class="compare-title">짝과 함께 공통점을 찾아보세요</div>
+      <div class="compare-sub">두 곡에서 고른 키워드를 바탕으로 공통점을 써보세요</div>
+      <div class="kw-summary">
+        <div class="kw-summary-title">🎵 쑥대머리</div>
+        <div class="kw-tags" id="summary-kw1"></div>
+      </div>
+      <div class="kw-summary">
+        <div class="kw-summary-title">🎭 해하가</div>
+        <div class="kw-tags" id="summary-kw2"></div>
+      </div>
+      <div class="hint-box">💡 계면조와 이황은 어떤 공통점이 있나요? 두 곡의 발성 방식과 음을 표현하는 방식도 비교해보세요.</div>
+      <div class="reason-label" style="font-size:13px;font-weight:700;color:#8b0000;margin-bottom:6px">🟢 두 곡의 공통점</div>
+      <textarea class="compare-input" id="common" placeholder="짝과 함께 이야기하여 적어보세요"></textarea>
+
+      <div class="havruta-section">
+        <div class="havruta-title">🔁 짝과 질문 주고받기</div>
+        <div class="havruta-sub">두 곡을 비교하며 떠오른 질문을 짝과 주고받아보세요</div>
+        <div class="havruta-grid">
+          <div class="havruta-card mine">
+            <div class="havruta-card-title">💬 내가 짝에게 하는 질문</div>
+            <textarea class="havruta-input" id="my-q" placeholder="질문을 적어보세요"></textarea>
+          </div>
+          <div class="havruta-card pair">
+            <div class="havruta-card-title">✏️ 짝의 답변</div>
+            <textarea class="havruta-input" id="pair-a" placeholder="짝의 답변을 적어보세요"></textarea>
+          </div>
+        </div>
+        <div class="havruta-grid">
+          <div class="havruta-card pair">
+            <div class="havruta-card-title">💬 짝이 나에게 하는 질문</div>
+            <textarea class="havruta-input" id="pair-q" placeholder="짝의 질문을 적어보세요"></textarea>
+          </div>
+          <div class="havruta-card mine">
+            <div class="havruta-card-title">✏️ 나의 답변</div>
+            <textarea class="havruta-input" id="my-a" placeholder="나의 답변을 적어보세요"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="toResult()">완료</button>
+    </div>
+
+    <div class="screen" id="s-done">
+      <div class="done-icon">🎉</div>
+      <div class="done-title">비교·분석 완료!</div>
+      <div class="done-sub">짝과 함께 발표해보세요</div>
+      <div class="done-card">
+        <div class="done-card-title">🎵 쑥대머리 키워드</div>
+        <div class="kw-tags" id="done-kw1" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="done-card">
+        <div class="done-card-title">🎭 해하가 키워드</div>
+        <div class="kw-tags" id="done-kw2" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+      <div class="done-card">
+        <div class="done-card-title">🟢 공통점</div>
+        <div class="done-row" id="done-common"></div>
+      </div>
+      <div class="done-card">
+        <div class="done-card-title">🔁 질문 주고받기</div>
+        <div class="done-key">내 질문</div>
+        <div class="done-row" id="done-myq"></div>
+        <div class="done-key">짝의 답변</div>
+        <div class="done-row" id="done-paira"></div>
+        <div class="done-key">짝의 질문</div>
+        <div class="done-row" id="done-pairq"></div>
+        <div class="done-key">나의 답변</div>
+        <div class="done-row" id="done-mya"></div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">↺ 처음부터 다시</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const selected={1:new Set(),2:new Set()};
+const checked={1:false,2:false};
+const correctKw={1:[],2:[]};
+const styleCorrect={1:'계면조',2:'이황'};
+const styleSelected={1:null,2:null};
+const styleChecked={1:false,2:false};
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function selStyle(num,val){
+  if(styleChecked[num])return;
+  styleSelected[num]=val;
+  const keys=num===1?['계면조','우조']:['서피','이황'];
+  keys.forEach(k=>{const el=document.getElementById('s'+num+'-'+k);if(el)el.classList.toggle('selected',k===val);});
+}
+function toggleKw(el,num){
+  if(checked[num])return;
+  el.classList.toggle('selected');
+  if(el.classList.contains('selected'))selected[num].add(el);
+  else selected[num].delete(el);
+}
+function checkAnswer(num){
+  if(checked[num])return;
+  checked[num]=true;styleChecked[num]=true;
+  const keys=num===1?['계면조','우조']:['서피','이황'];
+  keys.forEach(k=>{
+    const el=document.getElementById('s'+num+'-'+k);
+    if(!el)return;el.onclick=null;
+    if(k===styleCorrect[num]){el.classList.remove('selected');el.classList.add('correct');}
+    else if(k===styleSelected[num]){el.classList.remove('selected');el.classList.add('wrong');}
+  });
+  document.getElementById('check'+num).disabled=true;
+  const btns=document.getElementById('kw'+num).querySelectorAll('.kw-btn');
+  let correct=0,total=0;
+  btns.forEach(btn=>{
+    const isCorrect=btn.dataset.correct==='true';
+    const isSelected=selected[num].has(btn);
+    if(isCorrect){total++;correctKw[num].push(btn.textContent);}
+    btn.onclick=null;
+    if(isCorrect&&isSelected){btn.className='kw-btn correct';correct++;}
+    else if(!isCorrect&&isSelected){btn.className='kw-btn wrong';}
+    else if(isCorrect&&!isSelected){btn.className='kw-btn missed';}
+    else{btn.className='kw-btn';btn.style.opacity='.4';}
+  });
+  const msg=document.getElementById('result'+num);msg.style.display='block';
+  const fb=document.getElementById('feedback'+num);fb.classList.add('show');
+  const styleOk=styleSelected[num]===styleCorrect[num];
+  const kwOk=correct===total&&selected[num].size===total;
+  if(styleOk&&kwOk){msg.textContent='🎉 모두 정확히 골랐어요!';msg.style.background='#f0fff4';msg.style.color='#1a6b3a';fb.classList.add('good');}
+  else{msg.textContent='다시 확인해보세요! 노란색은 선택하지 못한 정답이에요.';msg.style.background='#f9e4e4';msg.style.color='#8b0000';fb.classList.add('bad');}
+  if(checked[1]&&checked[2])document.getElementById('next-btn').disabled=false;
+}
+function toCompare(){
+  [1,2].forEach(n=>{
+    const wrap=document.getElementById('summary-kw'+n);wrap.innerHTML='';
+    const styleTag=document.createElement('span');styleTag.className='kw-tag style';styleTag.textContent=styleCorrect[n];wrap.appendChild(styleTag);
+    correctKw[n].forEach(kw=>{const t=document.createElement('span');t.className='kw-tag';t.textContent=kw;wrap.appendChild(t);});
+  });
+  showScreen('s-compare');
+}
+function toResult(){
+  [1,2].forEach(n=>{
+    const wrap=document.getElementById('done-kw'+n);wrap.innerHTML='';
+    const styleTag=document.createElement('span');styleTag.className='kw-tag style';styleTag.textContent=styleCorrect[n];wrap.appendChild(styleTag);
+    correctKw[n].forEach(kw=>{const t=document.createElement('span');t.className='kw-tag';t.textContent=kw;wrap.appendChild(t);});
+  });
+  document.getElementById('done-common').textContent=document.getElementById('common').value||'—';
+  document.getElementById('done-myq').textContent=document.getElementById('my-q').value||'—';
+  document.getElementById('done-paira').textContent=document.getElementById('pair-a').value||'—';
+  document.getElementById('done-pairq').textContent=document.getElementById('pair-q').value||'—';
+  document.getElementById('done-mya').textContent=document.getElementById('my-a').value||'—';
+  showScreen('s-done');
+}
+function resetAll(){
+  [1,2].forEach(n=>{
+    selected[n].clear();correctKw[n]=[];checked[n]=false;styleChecked[n]=false;styleSelected[n]=null;
+    document.getElementById('check'+n).disabled=false;
+    document.getElementById('result'+n).style.display='none';
+    document.getElementById('feedback'+n).className='feedback';
+    const keys=n===1?['계면조','우조']:['서피','이황'];
+    keys.forEach(k=>{const el=document.getElementById('s'+n+'-'+k);if(el){el.className='style-btn';el.onclick=()=>selStyle(n,k);}});
+    document.getElementById('kw'+n).querySelectorAll('.kw-btn').forEach(b=>{b.className='kw-btn';b.style.opacity='1';b.onclick=()=>toggleKw(b,n);});
+    document.getElementById('reason'+n).value='';
+  });
+  document.getElementById('next-btn').disabled=true;
+  document.getElementById('common').value='';
+  document.getElementById('my-q').value='';
+  document.getElementById('pair-a').value='';
+  document.getElementById('pair-q').value='';
+  document.getElementById('my-a').value='';
+  showScreen('s-kw');
+}
+</script>
+</body>
+</html>
